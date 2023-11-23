@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Baseline>
+		<Title>baseline - linux packages</Title>
+		<Description><![CDATA[&lt;enter a description of the baseline here&gt; ]]></Description>
+		<Relevance>name of operating system contains "Linux"</Relevance>
+		<Relevance><![CDATA[(if (not exists file "UpgradablePackages.txt" of parent folder of client) then true else if (modification time of file "UpgradablePackages.txt" of parent folder of client < (now - 2 * hour)) then true else false) or (if (not exists file "PackagesOnHoldList.txt" of parent folder of client) then true else if (modification time of file "PackagesOnHoldList.txt" of parent folder of client < (now - 2 * hour)) then true else false)]]></Relevance>
+		<Category></Category>
+		<Source></Source>
+		<SourceID></SourceID>
+		<SourceSeverity></SourceSeverity>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Tue, 21 Nov 2023 14:28:49 +0000</Value>
+		</MIMEField>
+		<Domain>BESC</Domain>
+		<BaselineComponentCollection>
+			<BaselineComponentGroup>
+				<BaselineComponent Name="create_upgradables" IncludeInRelevance="true" SourceSiteURL="http://host.domain:52311/cgi-bin/bfgather.exe/actionsite" SourceID="111111" ActionName="Action1">
+					<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[if {name of operating system contains "Linux"}
+	delete __appendfile
+	appendfile #!/bin/sh
+	appendfile touch "{pathname of parent folder of client}/UpgradablePackages.txt"
+else
+	exit 8
+endif
+if {name of operating system contains "Ubuntu"}
+	appendfile apt update
+	appendfile apt list --upgradable | awk '!/Listing.../' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+elseif {name of operating system contains "Red Hat"}
+    appendfile yum check-update | awk '!/^$/' | awk '!/Last metadata/' | awk '{{ print $1 " | " $2 }' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+elseif {name of operating system contains "CentOS"}
+	appendfile yum check-update | awk '!/^$/' | awk '!/Loaded plugins/' | awk '!/Loading/' | awk '!/epel/' | awk '{{ print $1 " | " $2 }' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+endif
+delete "UpgradablePackages.sh"
+delete "{pathname of parent folder of client}/UpgradablePackages.txt"
+move __appendfile "UpgradablePackages.sh"
+wait chmod +x UpgradablePackages.sh
+wait ./UpgradablePackages.sh
+
+exit 0]]></ActionScript>
+					<SuccessCriteria Option="RunToCompletion"></SuccessCriteria>
+					<Relevance><![CDATA[((name of operating system contains "Linux") AND ((exists file "apt-cache" of folder "/usr/bin") or (exists file "yum" of folder "/usr/bin"))) AND (if (not exists file "UpgradablePackages.txt" of parent folder of client) then true else if (modification time of file "UpgradablePackages.txt" of parent folder of client  < now - 2 * hour) then true else false)]]></Relevance>
+				</BaselineComponent>
+				<BaselineComponent Name="create_on_hold" IncludeInRelevance="true" SourceSiteURL="http://host.domain:52311/cgi-bin/bfgather.exe/actionsite" SourceID="222222" ActionName="Action1">
+					<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[if {name of operating system contains "Linux"}	
+	delete __appendfile
+	appendfile #!/bin/sh
+	appendfile touch "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+else
+	exit 8
+endif
+if {name of operating system contains "Ubuntu"}
+	appendfile dpkg --get-selections | grep "hold" | awk '{{gsub("hold", "");print}' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+elseif {name of operating system contains "Red Hat"}
+	appendfile yum versionlock list | awk '!/Last metadata expiration check/' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+elseif {name of operating system contains "CentOS"}
+	appendfile yum versionlock list | awk '!/Loaded plugins:/' | awk '!/versionlock list done/' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+endif
+delete "PackagesOnHoldList.sh"
+delete "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+move __appendfile "PackagesOnHoldList.sh"
+wait chmod +x PackagesOnHoldList.sh
+wait ./PackagesOnHoldList.sh
+
+exit 0]]></ActionScript>
+					<SuccessCriteria Option="RunToCompletion"></SuccessCriteria>
+					<Relevance><![CDATA[((name of operating system contains "Linux") AND ((exists file "apt-cache" of folder "/usr/bin") or (exists file "yum" of folder "/usr/bin"))) AND (if (not exists file "PackagesOnHoldList.txt" of parent folder of client) then true else if (modification time of file "PackagesOnHoldList.txt" of parent folder of client  < now - 2 * hour) then true else false)]]></Relevance>
+				</BaselineComponent>
+			</BaselineComponentGroup>
+		</BaselineComponentCollection>
+		<Settings>
+			<PreActionShowUI>false</PreActionShowUI>
+			<HasRunningMessage>false</HasRunningMessage>
+			<HasTimeRange>true</HasTimeRange>
+			<TimeRange>
+				<StartTime>04:00:00</StartTime>
+				<EndTime>05:00:00</EndTime>
+			</TimeRange>
+			<HasStartTime>false</HasStartTime>
+			<HasEndTime>false</HasEndTime>
+			<HasDayOfWeekConstraint>false</HasDayOfWeekConstraint>
+			<UseUTCTime>false</UseUTCTime>
+			<ActiveUserRequirement>NoRequirement</ActiveUserRequirement>
+			<ActiveUserType>AllUsers</ActiveUserType>
+			<HasWhose>false</HasWhose>
+			<PreActionCacheDownload>false</PreActionCacheDownload>
+			<Reapply>true</Reapply>
+			<HasReapplyLimit>false</HasReapplyLimit>
+			<HasReapplyInterval>false</HasReapplyInterval>
+			<HasRetry>false</HasRetry>
+			<HasTemporalDistribution>false</HasTemporalDistribution>
+			<ContinueOnErrors>true</ContinueOnErrors>
+			<PostActionBehavior Behavior="Nothing"></PostActionBehavior>
+			<IsOffer>false</IsOffer>
+		</Settings>
+		<SettingsLocks>
+			<ActionUITitle>false</ActionUITitle>
+			<PreActionShowUI>true</PreActionShowUI>
+			<PreAction>
+				<Text>false</Text>
+				<AskToSaveWork>false</AskToSaveWork>
+				<ShowActionButton>false</ShowActionButton>
+				<ShowCancelButton>false</ShowCancelButton>
+				<DeadlineBehavior>false</DeadlineBehavior>
+				<ShowConfirmation>false</ShowConfirmation>
+			</PreAction>
+			<HasRunningMessage>true</HasRunningMessage>
+			<RunningMessage>
+				<Text>false</Text>
+			</RunningMessage>
+			<TimeRange>true</TimeRange>
+			<StartDateTimeOffset>true</StartDateTimeOffset>
+			<EndDateTimeOffset>true</EndDateTimeOffset>
+			<DayOfWeekConstraint>true</DayOfWeekConstraint>
+			<ActiveUserRequirement>true</ActiveUserRequirement>
+			<ActiveUserType>true</ActiveUserType>
+			<Whose>true</Whose>
+			<PreActionCacheDownload>true</PreActionCacheDownload>
+			<Reapply>true</Reapply>
+			<ReapplyLimit>true</ReapplyLimit>
+			<RetryCount>true</RetryCount>
+			<RetryWait>false</RetryWait>
+			<TemporalDistribution>true</TemporalDistribution>
+			<ContinueOnErrors>true</ContinueOnErrors>
+			<PostActionBehavior>
+				<Behavior>true</Behavior>
+				<AllowCancel>false</AllowCancel>
+				<Deadline>false</Deadline>
+				<Title>false</Title>
+				<Text>false</Text>
+			</PostActionBehavior>
+			<IsOffer>true</IsOffer>
+			<AnnounceOffer>true</AnnounceOffer>
+			<OfferCategory>false</OfferCategory>
+			<OfferDescriptionHTML>false</OfferDescriptionHTML>
+		</SettingsLocks>
+	</Baseline>
+</BES>
