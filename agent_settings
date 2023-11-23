@@ -1,7 +1,7 @@
 '''
 Relevance:
 
-not exists settings "Server_Agent_Settings_Version" whose( (it = "1.1") of (it as string) of values of it ) of client
+not exists settings "Server_Agent_Settings_Version" whose( (it = "1.2") of (it as string) of values of it ) of client
 not exists relay service
 not exists main gather service
 computer name as lowercase is not "some_computer_name"
@@ -33,10 +33,12 @@ setting "_BESClient_Download_UtilitiesCacheLimitMB"="512" on "{parameter "action
 
 setting "_BESClient_Log_Days"="31" on "{parameter "action issue date" of action}" for client
 
-setting "_BESClient_ActionManager_PendingRestartExclusions"=":;" on "{parameter "action issue date" of action}" for client
-
-
+setting "_BESClient_ActionManager_PendingRestartExclusions"=:; on "{parameter "action issue date" of action}" for client
 
 //Used for setting the relevance. If a new version is created, the value here and in the relevance tab will need updating to match.
 
-setting "Server_Agent_Settings_Version"="1.1" on "{parameter "action issue date" of action}" for client
+setting "Server_Agent_Settings_Version"="1.2" on "{parameter "action issue date" of action}" for client
+
+
+
+
