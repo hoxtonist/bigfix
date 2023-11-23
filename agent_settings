@@ -1,0 +1,42 @@
+'''
+Relevance:
+
+not exists settings "Server_Agent_Settings_Version" whose( (it = "1.1") of (it as string) of values of it ) of client
+not exists relay service
+not exists main gather service
+computer name as lowercase is not "some_computer_name"
+
+'''
+
+// SERVER AGENT SETTINGS
+
+
+setting "__RelaySelect_Automatic"="0" on "{parameter "action issue date" of action}" for client
+
+setting "__RelayServer1"="http://host.domain:52311/bfmirror/downloads/" on "{parameter "action issue date" of action}" for client
+
+setting "__RelayServer2"="http://host.domain:52311/bfmirror/downloads/" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Comm_CommandPollEnable"="1" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Comm_CommandPollIntervalSeconds"="900" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Comm_IPCommunicationsMode"="OnlyIpv4" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Download_DownloadsCacheLimitMB"="2048" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Download_NormalStageDiskLimitMB"="4096" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Download_PreCacheStageDiskLimitMB"="4096" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Download_UtilitiesCacheLimitMB"="512" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Log_Days"="31" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_ActionManager_PendingRestartExclusions"=":;" on "{parameter "action issue date" of action}" for client
+
+
+
+//Used for setting the relevance. If a new version is created, the value here and in the relevance tab will need updating to match.
+
+setting "Server_Agent_Settings_Version"="1.1" on "{parameter "action issue date" of action}" for client
