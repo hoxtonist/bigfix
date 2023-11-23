@@ -1,0 +1,30 @@
+'''
+Relevance:
+name of operating system contains "Linux"
+(exists file "apt-cache" of folder "/usr/bin") or (exists file "yum" of folder "/usr/bin")
+if (not exists file "PackagesOnHoldList.txt" of parent folder of client) then true else if (modification time of file "PackagesOnHoldList.txt" of parent folder of client  < now - 2 * hour) then true else false
+'''
+
+
+
+if {name of operating system contains "Linux"}	
+	delete __appendfile
+	appendfile #!/bin/sh
+	appendfile touch "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+else
+	exit 8
+endif
+if {name of operating system contains "Ubuntu"}
+	appendfile dpkg --get-selections | grep "hold" | awk '{{gsub("hold", "");print}' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+elseif {name of operating system contains "Red Hat"}
+	appendfile yum versionlock list | awk '!/Last metadata expiration check/' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+elseif {name of operating system contains "CentOS"}
+	appendfile yum versionlock list | awk '!/Loaded plugins:/' | awk '!/versionlock list done/' > "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+endif
+delete "PackagesOnHoldList.sh"
+delete "{pathname of parent folder of client}/PackagesOnHoldList.txt"
+move __appendfile "PackagesOnHoldList.sh"
+wait chmod +x PackagesOnHoldList.sh
+wait ./PackagesOnHoldList.sh
+
+exit 0
