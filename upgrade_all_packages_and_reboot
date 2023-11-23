@@ -1,0 +1,44 @@
+'''
+Relevance:
+
+name of operating system contains "Linux"
+
+if (not exists file "UpgradablePackages.txt" of parent folder of client) then false else if (modification time of file "UpgradablePackages.txt" of parent folder of client < (now - 6 * day)) then false else if (number of lines of file "UpgradablePackages.txt" of parent folder of client < 1) then false else true
+
+'''
+
+// Enter your action script here
+
+if {name of operating system contains "Linux"}
+	delete __appendfile
+	appendfile #!/bin/sh
+	appendfile touch "{pathname of parent folder of client}/UpgradablePackages.txt"
+else
+	exit 8
+endif
+if {name of operating system contains "Ubuntu"}
+	appendfile apt update
+	appendfile sudo apt -y upgrade
+	appendfile apt update
+	appendfile apt list --upgradable | awk '!/Listing.../' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+elseif {name of operating system contains "Red Hat"}
+    appendfile dnf check-update
+	appendfile dnf -y upgrade
+	appendfile yum check-update | awk '!/^$/' | awk '!/Last metadata/' | awk '{{ print $1 " | " $2 }' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+elseif {name of operating system contains "CentOS"}
+	appendfile yum check-update 
+	appendfile yum -y update
+	appendfile yum check-update | awk '!/^$/' | awk '!/Loaded plugins/' | awk '!/Loading/' | awk '!/epel/' | awk '{{ print $1 " | " $2 }' > "{pathname of parent folder of client}/UpgradablePackages.txt"
+endif
+delete "UpgradeLocalPackages.sh"
+delete "{pathname of parent folder of client}/UpgradablePackages.txt"
+move __appendfile "UpgradeLocalPackages.sh"
+wait chmod +x UpgradeLocalPackages.sh
+wait ./UpgradeLocalPackages.sh
+
+if {pending restart}
+	run /bin/sh -c sync
+	run /bin/sh -c reboot now
+endif
+
+exit 0
